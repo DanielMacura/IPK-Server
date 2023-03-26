@@ -40,15 +40,21 @@ public class Tcp
                 if (ClientInitiatedExit)
                 {
                     ClientInitiatedExit = true;
-                    Environment.Exit(0);
+                    //Environment.Exit(0);
                 }
                 else
                 {
                     SendTcp("BYE");
                     ClientInitiatedExit = true;
-                    Environment.Exit(0);
+                    //Environment.Exit(0);
                 }
             }
+            else if (message.Trim().StartsWith("SOLVE "))
+            {
+                Evaluator eval = new Evaluator();
+                var result = eval.Evaluate(message.Trim().Substring(5, message.Length-5));
+            }
+
 
             if (ClientInitiatedExit == false) _stream.BeginRead(_state.Buffer, 0, BufSize, _recv, so);
         }, _state);

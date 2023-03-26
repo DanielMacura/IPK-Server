@@ -10,13 +10,6 @@ namespace ipkpd
     {
         public double Evaluate(string input)
         {
-            
-
-            //var pattern = @"(?<expr>(?>\((?<operator>[\+\-\*\/])\s+(?<expr1>(?<-expr>)|\d+)\s+(?<expr2>(?<-expr>)|\d+)\))|\d+)";
-
-            //var regex = new Regex(pattern);
-            //var match = regex.Match(input);
-
             return PrefixCalculator(ABFNFormToPrefix(input));
         }
         private string ABFNFormToPrefix(string input)
@@ -129,19 +122,16 @@ namespace ipkpd
 
                     var e = new Expression(int1 + " "+ item + " " + int2);
                     
-                    parserStack.Push(Double.Parse(e.Evaluate().ToString()));
+                    parserStack.Push(Double.Parse(e.Evaluate().ToString() ?? throw new InvalidOperationException()));
                 }
             }
 
 
-            if (parserStack != null)
-            {
-                double result = parserStack.Peek();
-                Console.WriteLine("Result: {0}", result);
-                return result;
-            }
 
-            return -100000000;
+            
+            double result = parserStack.Peek();
+            Console.WriteLine("Result: {0}", result);
+            return result;
         }
     }
 }
