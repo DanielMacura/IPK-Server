@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
 
 namespace ipkpd;
@@ -14,8 +15,12 @@ public class Tcp
 
     public void Stream(string host, int port)
     {
-        var client = new TcpClient(host, port);
+        var ipAddress = IPAddress.TryParse(host, out _)
+            ? IPAddress.Parse(host)
+            : Dns.GetHostEntry(host).AddressList[0].MapToIPv4();
+        var client = new TcpClient(ipAddress.ToString(), port);
         _stream = client.GetStream();
+
     }
 
     public void ListenTcp()

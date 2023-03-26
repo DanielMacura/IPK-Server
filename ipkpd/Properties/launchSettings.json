@@ -7,6 +7,10 @@
     "localh UDP": {
       "commandName": "Project",
       "commandLineArgs": "-h 127.0.0.1 -p 4747 -m udp"
+    },
+    "local TCP": {
+      "commandName": "Project",
+      "commandLineArgs": "-h 127.0.0.1 -p 4747 -m tcp"
     }
   }
 }
