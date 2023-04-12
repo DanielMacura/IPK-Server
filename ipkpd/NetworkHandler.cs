@@ -20,7 +20,8 @@ public class NetworkHandler
             case "tcp":
             {
                 _clientTcp = new Tcp();
-                _clientTcp.Stream(host, port);
+                _clientTcp.Server(host, port);
+                //_clientTcp.Stream(host, port);
                 _clientTcp.ListenTcp();
                 break;
             }
@@ -29,8 +30,8 @@ public class NetworkHandler
                 var s = new UdpSocket();
                 s.Server(IPAddress.Loopback.ToString(), port);
 
-                _clientUdpSocket = new UdpSocket();
-                _clientUdpSocket.Client(host, port);
+                //_clientUdpSocket = new UdpSocket();
+                //_clientUdpSocket.Client(host, port);
                 break;
             }
         }

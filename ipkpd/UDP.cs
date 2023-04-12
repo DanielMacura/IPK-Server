@@ -58,34 +58,51 @@ public class UdpSocket
 
     private void Receive()
     {
-        _=_socket.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
+        EndPoint lastConnected = null;
+        for (;;)
         {
-            var so = ar.AsyncState as State;
-            var bytes = _socket.EndReceiveFrom(ar, ref _epFrom);
+            if (_socket.Poll(-1, SelectMode.SelectRead))
+            {
+                _=_socket.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
+                {
+                    var so = ar.AsyncState as State;
+                    var bytes = _socket.EndReceiveFrom(ar, ref _epFrom);        //TODO add check for 0
 
+                    
+                    int opcode = so.Buffer[0];
+                    int payloadLength = so.Buffer[1];
+                    var message = Encoding.ASCII.GetString(so.Buffer, 2, bytes - 2);
+                    Console.WriteLine("Received");
+                    var truncatedToNLength = new string(message.Take(payloadLength).ToArray());
+                    if (opcode is 0)
+                    {
+                        var eval = new Evaluator();
+                        var result = eval.Evaluate(truncatedToNLength);
+                        Console.WriteLine("From {0}", _epFrom.ToString());
+                        //_clientUdpSocket = new UdpSocket();
+                        //_clientUdpSocket.Client(_epFrom.ToString().Split(':')[0], Int32.Parse(_epFrom.ToString().Split(':')[1]));
+                        //_clientUdpSocket.Send(result.ToString());
+                        //Client(_epFrom.ToString().Split(':')[0], Int32.Parse(_epFrom.ToString().Split(':')[1]));
+                        if (!_socket.Connected || lastConnected!=_epFrom)
+                        {
+                            lastConnected = _epFrom;
+                            _socket.Connect(_epFrom.ToString().Split(':')[0],
+                                Int32.Parse(_epFrom.ToString().Split(':')[1]));
+                        }
+                        Send(result.ToString());
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine("Incorrect UPD packet received. Opcode is not 1 - receive.");
+                    }
+                    _socket.BeginReceiveFrom(so.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv, so);
+                }, _state);
+
+            }
+        }
+        
             
-            _socket.BeginReceiveFrom(so.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv, so);
-            int opcode = so.Buffer[0];
-            int payloadLength = so.Buffer[1];
-            var message = Encoding.ASCII.GetString(so.Buffer, 2, bytes - 2);
-            Console.WriteLine("Recieved");
-            var truncatedToNLength = new string(message.Take(payloadLength).ToArray());
-            if (opcode is 0)
-            {
-                Evaluator eval = new Evaluator();
-                var result = eval.Evaluate(truncatedToNLength);
-                Console.WriteLine("From {0}", _epFrom.ToString());
-                // _clientUdpSocket = new UdpSocket();
-                //_clientUdpSocket.Client(_epFrom.ToString().Split(':')[0], Int32.Parse(_epFrom.ToString().Split(':')[1]));
-                //_clientUdpSocket.Send(result.ToString());
-                Client(_epFrom.ToString().Split(':')[0], Int32.Parse(_epFrom.ToString().Split(':')[1]));
-                Send(result.ToString());
-            }
-            else
-            {
-                Console.Error.WriteLine("Incorrect UPD packet received. Opcode is not 1 - receive.");
-            }
-        }, _state);
+        
     }
 
     public class State

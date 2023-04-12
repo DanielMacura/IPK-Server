@@ -10,7 +10,7 @@
     },
     "local TCP": {
       "commandName": "Project",
-      "commandLineArgs": "-h 127.0.0.1 -p 4747 -m tcp"
+      "commandLineArgs": "-h 127.0.0.1 -p 47475 -m tcp"
     }
   }
 }
