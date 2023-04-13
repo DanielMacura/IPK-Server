@@ -23,7 +23,7 @@ public class Tcp
 
     private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
     //private Socket _socket;
-    private Socket handler;
+    private Socket _handler;
     static IPEndPoint _sender = new IPEndPoint(IPAddress.Any, 0);
     private EndPoint _epFrom = _sender;
 
@@ -45,11 +45,12 @@ public class Tcp
             catch (Exception e)
             {
                 // Log etc.
+                Console.Error.WriteLine(e);
             }
         }
     }
 
-    private enum clientStates
+    private enum ClientStates
     {
         Connected,
         Greeted,
@@ -61,7 +62,7 @@ public class Tcp
     {
         Console.WriteLine("Connected");
         var buffer = BufferPool.Instance.Checkout();
-        var clientState = clientStates.Connected;
+        var clientState = ClientStates.Connected;
         try
         {
             await using var ns = new NetworkStream(client, true);
@@ -93,7 +94,7 @@ public class Tcp
         }
     }
 
-    private void OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns, ref clientStates clientState)
+    private void OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns, ref ClientStates clientState)
     {
         var bytes = arraySegment.ToArray();
         var text = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
@@ -101,11 +102,11 @@ public class Tcp
         var result = "Incorrect solve";
         if (text.Trim() == "HELLO")
         {
-            if (clientState == clientStates.Connected)
+            if (clientState == ClientStates.Connected)
             {
-                clientState = clientStates.Greeted;
+                clientState = ClientStates.Greeted;
             }
-            else if (clientState != clientStates.Connected)
+            else if (clientState != ClientStates.Connected)
             {
                 Console.WriteLine("Client greeted in incorrect connection state.");
 
@@ -130,75 +131,20 @@ public class Tcp
 
     }
 
-    public async void Server(string address, int port)
-    {
-        //_socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
-        _socket.Bind(new IPEndPoint(IPAddress.Parse(address), port));
-        _socket.Listen();
-        //await _socket.ConnectAsync(address, port);
-
-        Console.WriteLine("listning");
-        /*
-        var handler = await _socket.AcceptAsync();
-        while (true)
-        {
-            // Receive message.
-            var buffer = new byte[1_024];
-            var received = await handler.ReceiveAsync(buffer, SocketFlags.None);
-            var response = Encoding.UTF8.GetString(buffer, 0, received);
-
-            var eom = "<|EOM|>";
-            if (response.IndexOf(eom) > -1 /)
-            {
-                Console.WriteLine(
-                    $"Socket server received message: \"{response.Replace(eom, "")}\"");
-
-                var ackMessage = "<|ACK|>";
-                var echoBytes = Encoding.UTF8.GetBytes(ackMessage);
-                await handler.SendAsync(echoBytes, 0);
-                Console.WriteLine(
-                    $"Socket server sent acknowledgment: \"{ackMessage}\"");
-
-                break;
-            }
-            // Sample output:
-            //    Socket server received message: "Hi friends 👋!"
-            //    Socket server sent acknowledgment: "<|ACK|>"
-        }
-        */
-
-    }
-
-    public void Client(string address, int port)
-    {
-        //var ipHostInfo = Dns.GetHostEntry(address);
-        //var ipAddress = ipHostInfo.AddressList[0].MapToIPv4();
-        _socket.Connect(address, port);
-        ListenTcp();
-    }
-
-    public void Stream(string host, int port)
-    {
-        var ipAddress = IPAddress.TryParse(host, out _)
-            ? IPAddress.Parse(host)
-            : Dns.GetHostEntry(host).AddressList[0].MapToIPv4();
-        var client = new TcpClient(ipAddress.ToString(), port);
-        _stream = client.GetStream();
-
-    }
+   
 
     public void ListenTcp()
     {
         for(;;)
         {
             _state = new State();
-            handler =  _socket.Accept();
+            _handler =  _socket.Accept();
             Console.WriteLine("connected");
 
-            _ = handler.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
+            _ = _handler.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
             {
                 var so = ar.AsyncState as State;
-                var bytes = handler.EndReceiveFrom(ar, ref _epFrom);    //TODO add check for 0
+                var bytes = _handler.EndReceiveFrom(ar, ref _epFrom);    //TODO add check for 0
 
                 if (so == null) return;
                 var message = Encoding.ASCII.GetString(so.Buffer, 0, bytes);
@@ -207,7 +153,7 @@ public class Tcp
                 var data = Encoding.ASCII.GetBytes("replay");
                 var bytesResponse = new byte[data.Length];
                 //handler.Send(bytesResponse, SocketFlags.None);
-                handler.SendAsync(data, SocketFlags.None);
+                _handler.SendAsync(data, SocketFlags.None);
                 if (message.Trim() is "BYE")
                 {
                     if (ClientInitiatedExit)
@@ -229,7 +175,7 @@ public class Tcp
                 }
 
 
-                if (ClientInitiatedExit == false) handler.BeginReceiveFrom(so.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv, so);
+                if (ClientInitiatedExit == false) _handler.BeginReceiveFrom(so.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv, so);
             }, _state);
             
         }

@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 //Source
 //https://gist.github.com/darkguy2008/413a6fea3a5b4e67e5e0d96f750088a9
@@ -16,6 +17,7 @@ public class UdpSocket
     static IPEndPoint _sender = new IPEndPoint(IPAddress.Any, 0);
     private EndPoint _epFrom = _sender;
     private AsyncCallback? _recv;
+
 
     public void Server(string address, int port)
     {
@@ -113,5 +115,79 @@ public class UdpSocket
     public class State
     {
         public byte[] Buffer = new byte[BufSize];
+    }
+
+
+    
+
+
+
+    bool _listening = true;
+
+    EndPoint _remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+    public async void Listen(string address, int port)
+    {
+        // ...
+        _socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.ReuseAddress, true);
+        _socket.Bind(new IPEndPoint(IPAddress.Parse(address), port));
+        while (_listening)
+        {
+            try
+            {
+
+                Console.WriteLine("Connecting");
+                var buffer = BufferPool.Instance.Checkout();
+                int count = _socket.ReceiveFrom(buffer.Array, buffer.Offset, buffer.Count, SocketFlags.None, ref _remoteEndPoint);
+
+                if (count > 0)
+                {
+                    OnDataRead(new ArraySegment<byte>(buffer.Array, buffer.Offset, count), ref _remoteEndPoint);
+                }
+            }
+            catch (Exception e)
+            {
+                // Log etc.
+                Console.Error.Write(e.ToString());
+            }
+        }
+    }
+
+
+
+    private void OnDataRead(ArraySegment<byte> arraySegment, ref EndPoint remoteEndPoint)
+    {
+        var receiveBytes = arraySegment.ToArray();
+        var message = Encoding.ASCII.GetString(receiveBytes, 2, receiveBytes.Length - 2);
+        Console.WriteLine("message" +message);
+        Evaluator eval = new Evaluator();
+
+        var result = eval.Evaluate(message).ToString();
+        Console.WriteLine(result);
+
+
+
+
+
+
+        if (result.Length > 255-3)
+        {
+            Console.Error.Write("ERROR: Calculated result over 255 bytes.");
+            return;
+        }
+        var data = Encoding.ASCII.GetBytes(result);
+        Console.WriteLine("trying to send {0}", result);
+        var sendbytes = new byte[data.Length + 3];
+
+        sendbytes[0] = 1;
+        sendbytes[1] = 0;
+        sendbytes[2] = (byte)data.Length;
+        data.CopyTo(sendbytes, 3);
+
+
+        var sentCount = _socket.SendTo(sendbytes, remoteEndPoint);
+        Console.WriteLine(sentCount);
+        //ns.Write(retBytes);
+        //ns.Flush();
+
     }
 }

@@ -29,10 +29,12 @@ public class NetworkHandler
             case "udp":
             {
                 var s = new UdpSocket();
-                s.Server(IPAddress.Loopback.ToString(), port);
+                //s.Server(IPAddress.Loopback.ToString(), port);
 
-                //_clientUdpSocket = new UdpSocket();
-                //_clientUdpSocket.Client(host, port);
+                s.Listen(host, port);
+
+                    //_clientUdpSocket = new UdpSocket();
+                    //_clientUdpSocket.Client(host, port);
                 break;
             }
         }

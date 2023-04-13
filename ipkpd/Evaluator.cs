@@ -3,20 +3,33 @@ using System.Collections;
 using NCalc;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace ipkpd
 {
     internal class Evaluator
     {
-        public double Evaluate(string input)
+        public BigInteger? Evaluate(string input)
         {
-            var prefix = ABFNFormToPrefix(input);
+
+            var prefix = AbfnFormToPrefix(input);
             Console.WriteLine(prefix);
             return PrefixCalculator(prefix);
         }
-        private string ABFNFormToPrefix(string input)
-        {
 
+        public static bool IsValid(string input)
+        {
+            string pattern = @"^(\((\+|-|\*|\/)(\s(\((\+|-|\*|\/)(\s(\d+|\((\+|-|\*|\/)(\s\d+)+\))){2,}\)|\d+)){2,}\))$";
+            return Regex.IsMatch(input, pattern);
+        }
+
+        private string? AbfnFormToPrefix(string input)
+        {
+            if (IsValid(input) == false)
+            {
+                Console.WriteLine("ERR: The provided expression does not match the ABNF grammar.");
+                return null;
+            }
             while (FindIndexes(input).Item1 != -1)
             {
                 input = Regex.Replace(input, @"\s+", " ");
@@ -37,7 +50,7 @@ namespace ipkpd
                     switch (charValue)
                     {
                         case '(':
-                            bracketCount++;break;
+                            bracketCount++; break;
                         case ')':
                             bracketCount--;
                             break;
@@ -52,12 +65,12 @@ namespace ipkpd
 
                 var start = original.Substring(0, indexes.Item1);
                 var mid = string.Join("", Enumerable.Repeat(opcode+" ", operatorCount)) + input;
-                
+
                 var end = original.Substring(indexes.Item2 + 1, original.Length - indexes.Item2-1);
 
-                Console.WriteLine("Start:{0}\nMid:{1}\nEnd:{2}", start,mid, end);
+                Console.WriteLine("Start:{0}\nMid:{1}\nEnd:{2}", start, mid, end);
                 input = start + mid + end;
-                        
+
 
                 Console.WriteLine(input);
                 Console.WriteLine("--------------------------------------------------------");
@@ -70,7 +83,7 @@ namespace ipkpd
         private Tuple<int, int> FindIndexes(string input)
         {
             int bracketCount = 0;
-            
+
             int first = -1;
             int last = -1;
             bool exitLoop = false;
@@ -83,7 +96,7 @@ namespace ipkpd
                         {
                             first = i;
                         }
-                        bracketCount++; 
+                        bracketCount++;
                         break;
                     case ')':
                         bracketCount--;
@@ -99,9 +112,13 @@ namespace ipkpd
             return new Tuple<int, int>(first, last);
         }
 
-        private double PrefixCalculator(string input)
+        private BigInteger? PrefixCalculator(string? input)
         {
-            var parserStack = new Stack<Double>();
+            if (input == null)
+            {
+                return null;
+            }
+            var parserStack = new Stack<BigInteger>();
 
             //Prefix Parser
             //var list = input.Replace("(", "").Replace(")", "").Split(" ");
@@ -111,24 +128,42 @@ namespace ipkpd
                 Console.WriteLine(item);
                 if (Regex.IsMatch(item.ToString(), @"^\d+$"))
                 {
-                    parserStack.Push(Double.Parse(item));
+                    parserStack.Push(BigInteger.Parse(item));
                 }
                 else if (Regex.IsMatch(item.ToString(), @"^\s$"))
                 {
-                    
+
                 }
                 else
                 {
                     var int1 = parserStack.Pop();
                     var int2 = parserStack.Pop();
-                    Console.WriteLine(int1 + " "+ item.Trim() + " " + int2);
-                    var e = new Expression(int1 + " "+ item.Trim() + " " + int2);
-                    
-                    parserStack.Push(Double.Parse(e.Evaluate().ToString() ?? "wwfwef"));
+                    var binaryOperator = item;
+
+                    Console.WriteLine(int1 + " "+ binaryOperator + " " + int2);
+
+                    switch (binaryOperator)
+                    {
+                        case "+":
+                            parserStack.Push(int1 + int2);
+                            break;
+                        case "-":
+                            parserStack.Push(int1 - int2);
+                            break;
+                        case "*":
+                            parserStack.Push(int1 * int2);
+                            break;
+                        case "/":
+                            parserStack.Push(int1 / int2);
+                            break;
+                        default:
+                            Console.WriteLine("ERR: Unknown operator \"{0}\".", binaryOperator);
+                            break;
+                    }
                 }
             }
 
-            double result = parserStack.Peek();
+            BigInteger result = parserStack.Peek();
             Console.WriteLine("Result: {0}", result);
             return result;
         }
