@@ -1,5 +1,8 @@
-﻿using System.Net;
+﻿using System;
+using System.Buffers;
+using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -9,16 +12,94 @@ public class Tcp
 {
     private const int BufSize = 8 * 1024;
     private const char Lf = (char)10;
-    private readonly State _state = new();
+    private State _state;
     private AsyncCallback? _recv;
     private NetworkStream? _stream;
     public bool ClientInitiatedExit;
+    //public ArrayPool<Byte> BufferPool = ArrayPool<Byte>.Create();
+
+    bool _listening = true;
 
 
-    private readonly Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+    //private Socket _socket;
     private Socket handler;
     static IPEndPoint _sender = new IPEndPoint(IPAddress.Any, 0);
     private EndPoint _epFrom = _sender;
+
+    public async void Listen(string address, int port)
+    {
+        // ...
+        _socket.Bind(new IPEndPoint(IPAddress.Parse(address), port));
+        _socket.Listen();
+        while (_listening)
+        {
+            try
+            {
+                Console.WriteLine("Connecting");
+
+                var client = await Task.Factory.FromAsync<Socket>(_socket.BeginAccept, _socket.EndAccept, null);
+
+                AcceptClient(client);
+            }
+            catch (Exception e)
+            {
+                // Log etc.
+            }
+        }
+    }
+    
+    private async void AcceptClient(Socket client)
+    {
+        ///var buffer = BufferPool.Instance.Checkout();
+        Console.WriteLine("Connected");
+        var buffer = BufferPool.Instance.Checkout();
+        try
+        {
+            using (var ns = new NetworkStream(client, true))
+            {
+                while (_listening && client.Connected)
+                {
+                    try
+                    {
+                        
+                        int Offset = new ();
+                        int Length = new();
+                        var count = await ns.ReadAsync(buffer.Array, buffer.Offset, buffer.Count);
+                        if (count == 0)
+                        {
+                            // Client disconnected normally.
+                            Console.WriteLine("Client left");
+                            break;
+                        }
+                        else
+                        {
+                            OnDataRead(new ArraySegment<byte>(buffer.Array, buffer.Offset, count), ns);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+                }
+            }
+        }
+        finally
+        {
+            BufferPool.Instance.CheckIn(buffer);
+        }
+    }
+
+    private void OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns)
+    {
+        var bytes = arraySegment.ToArray();
+        var text = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
+        Console.WriteLine(text+"LF");
+        var retBytes = Encoding.ASCII.GetBytes(text);
+        ns.Write(retBytes);
+        ns.Flush();
+
+    }
 
     public async void Server(string address, int port)
     {
@@ -77,14 +158,11 @@ public class Tcp
 
     }
 
-    public async Task ListenAsync()
-    {
-        
-    }
     public void ListenTcp()
     {
         for(;;)
         {
+            _state = new State();
             handler =  _socket.Accept();
             Console.WriteLine("connected");
 

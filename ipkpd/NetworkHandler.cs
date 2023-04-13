@@ -20,9 +20,10 @@ public class NetworkHandler
             case "tcp":
             {
                 _clientTcp = new Tcp();
-                _clientTcp.Server(host, port);
-                //_clientTcp.Stream(host, port);
-                _clientTcp.ListenTcp();
+                //_clientTcp.Server(host, port);
+                            //_clientTcp.Stream(host, port);
+                //_clientTcp.ListenTcp();
+                _clientTcp.Listen(host, port);
                 break;
             }
             case "udp":
