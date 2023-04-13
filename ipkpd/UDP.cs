@@ -58,6 +58,8 @@ public class UdpSocket
 
     private void Receive()
     {
+        Console.WriteLine("Receiving");
+
         EndPoint lastConnected = null;
         for (;;)
         {
@@ -65,6 +67,8 @@ public class UdpSocket
             {
                 _=_socket.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
                 {
+                    Console.WriteLine("Received");
+
                     var so = ar.AsyncState as State;
                     var bytes = _socket.EndReceiveFrom(ar, ref _epFrom);        //TODO add check for 0
 
@@ -78,6 +82,7 @@ public class UdpSocket
                     {
                         var eval = new Evaluator();
                         var result = eval.Evaluate(truncatedToNLength);
+                        Console.WriteLine(result);
                         Console.WriteLine("From {0}", _epFrom.ToString());
                         //_clientUdpSocket = new UdpSocket();
                         //_clientUdpSocket.Client(_epFrom.ToString().Split(':')[0], Int32.Parse(_epFrom.ToString().Split(':')[1]));

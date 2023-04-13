@@ -48,39 +48,42 @@ public class Tcp
             }
         }
     }
-    
+
+    private enum clientStates
+    {
+        Connected,
+        Greeted,
+        Disconnecting
+    }
+
+
     private async void AcceptClient(Socket client)
     {
-        ///var buffer = BufferPool.Instance.Checkout();
         Console.WriteLine("Connected");
         var buffer = BufferPool.Instance.Checkout();
+        var clientState = clientStates.Connected;
         try
         {
-            using (var ns = new NetworkStream(client, true))
+            await using var ns = new NetworkStream(client, true);
+            while (_listening && client.Connected)
             {
-                while (_listening && client.Connected)
+                try
                 {
-                    try
+                    var count = await ns.ReadAsync(buffer.Array.AsMemory(buffer.Offset, buffer.Count));
+                    if (count == 0)
                     {
-                        
-                        int Offset = new ();
-                        int Length = new();
-                        var count = await ns.ReadAsync(buffer.Array, buffer.Offset, buffer.Count);
-                        if (count == 0)
-                        {
-                            // Client disconnected normally.
-                            Console.WriteLine("Client left");
-                            break;
-                        }
-                        else
-                        {
-                            OnDataRead(new ArraySegment<byte>(buffer.Array, buffer.Offset, count), ns);
-                        }
+                        // Client disconnected normally.
+                        Console.WriteLine("Client left");
+                        break;
                     }
-                    catch (Exception e)
+                    else
                     {
-
+                        OnDataRead(new ArraySegment<byte>(buffer.Array, buffer.Offset, count), ns, ref clientState);
                     }
+                }
+                catch (Exception e)
+                {
+                    Console.Error.WriteLine(e);
                 }
             }
         }
@@ -90,12 +93,38 @@ public class Tcp
         }
     }
 
-    private void OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns)
+    private void OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns, ref clientStates clientState)
     {
         var bytes = arraySegment.ToArray();
         var text = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
         Console.WriteLine(text+"LF");
-        var retBytes = Encoding.ASCII.GetBytes(text);
+        var result = "Incorrect solve";
+        if (text.Trim() == "HELLO")
+        {
+            if (clientState == clientStates.Connected)
+            {
+                clientState = clientStates.Greeted;
+            }
+            else if (clientState != clientStates.Connected)
+            {
+                Console.WriteLine("Client greeted in incorrect connection state.");
+
+            }
+        }
+
+        if (text.Trim().StartsWith("SOLVE "))
+        {
+            Console.WriteLine(text.Trim());
+            Evaluator eval = new Evaluator();
+            var problem = text.Trim()[5..text.Trim().Length];
+
+            result = eval.Evaluate(problem).ToString();
+            Console.WriteLine(result);
+
+        }
+        Console.WriteLine(result);
+
+        var retBytes = Encoding.ASCII.GetBytes(result);
         ns.Write(retBytes);
         ns.Flush();
 
