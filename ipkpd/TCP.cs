@@ -6,26 +6,13 @@ using System.Security.Cryptography;
 using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace ipkpd;
+namespace ipkcpd;
 
 public class Tcp
 {
-    private const int BufSize = 8 * 1024;
     private const char Lf = (char)10;
-    private State _state;
-    private AsyncCallback? _recv;
-    private NetworkStream? _stream;
-    public bool ClientInitiatedExit;
-    //public ArrayPool<Byte> BufferPool = ArrayPool<Byte>.Create();
-
-    bool _listening = true;
-
-
-    private Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-    //private Socket _socket;
-    private Socket _handler;
-    static IPEndPoint _sender = new IPEndPoint(IPAddress.Any, 0);
-    private EndPoint _epFrom = _sender;
+    private bool _listening = true;
+    private readonly Socket _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
     public async void Listen(string address, int port)
     {
@@ -129,74 +116,5 @@ public class Tcp
         ns.Write(retBytes);
         ns.Flush();
 
-    }
-
-   
-
-    public void ListenTcp()
-    {
-        for(;;)
-        {
-            _state = new State();
-            _handler =  _socket.Accept();
-            Console.WriteLine("connected");
-
-            _ = _handler.BeginReceiveFrom(_state.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv = ar =>
-            {
-                var so = ar.AsyncState as State;
-                var bytes = _handler.EndReceiveFrom(ar, ref _epFrom);    //TODO add check for 0
-
-                if (so == null) return;
-                var message = Encoding.ASCII.GetString(so.Buffer, 0, bytes);
-
-                Console.WriteLine(message);
-                var data = Encoding.ASCII.GetBytes("replay");
-                var bytesResponse = new byte[data.Length];
-                //handler.Send(bytesResponse, SocketFlags.None);
-                _handler.SendAsync(data, SocketFlags.None);
-                if (message.Trim() is "BYE")
-                {
-                    if (ClientInitiatedExit)
-                    {
-                        ClientInitiatedExit = true;
-                        //Environment.Exit(0);
-                    }
-                    else
-                    {
-                        SendTcp("BYE");
-                        ClientInitiatedExit = true;
-                        //Environment.Exit(0);
-                    }
-                }
-                else if (message.Trim().StartsWith("SOLVE "))
-                {
-                    Evaluator eval = new Evaluator();
-                    var result = eval.Evaluate(message.Trim().Substring(5, message.Length-5));
-                }
-
-
-                if (ClientInitiatedExit == false) _handler.BeginReceiveFrom(so.Buffer, 0, BufSize, SocketFlags.None, ref _epFrom, _recv, so);
-            }, _state);
-            
-        }
-    }
-
-    public void SendTcp(string message)
-    {
-        try
-        {
-            if (message.Trim() is "BYE") ClientInitiatedExit = true;
-            var data = Encoding.ASCII.GetBytes(message + Lf);
-            _stream?.Write(data, 0, data.Length);
-        }
-        catch (ArgumentNullException e)
-        {
-            Console.WriteLine("ArgumentNullException: {0}", e);
-        }
-    }
-
-    public class State
-    {
-        public byte[] Buffer = new byte[BufSize];
     }
 }

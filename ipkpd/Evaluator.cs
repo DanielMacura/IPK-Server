@@ -1,11 +1,10 @@
 ﻿using System.Text.RegularExpressions;
-using System.Collections;
-using NCalc;
+using System.Collections; 
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace ipkpd
+namespace ipkcpd
 {
     internal class Evaluator
     {

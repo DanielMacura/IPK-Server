@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace ipkpd;
+namespace ipkcpd;
 
 public class NetworkHandler
 {

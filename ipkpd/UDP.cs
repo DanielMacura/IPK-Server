@@ -7,7 +7,7 @@ using static System.Net.Mime.MediaTypeNames;
 //https://gist.github.com/darkguy2008/413a6fea3a5b4e67e5e0d96f750088a9
 //
 
-namespace ipkpd;
+namespace ipkcpd;
 
 public class UdpSocket
 {

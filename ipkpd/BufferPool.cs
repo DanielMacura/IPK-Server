@@ -1,8 +1,9 @@
 ﻿using System.Collections.Concurrent;
 
-namespace ipkpd;
+namespace ipkcpd;
 
-/// 
+///
+/// Author: Jonathan Dickinson
 /// https://web.archive.org/web/20160728022524/http://blog.dickinsons.co.za/tips/2015/06/01/Net-Sockets-and-You/
 /// 
 

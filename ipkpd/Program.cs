@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using Mono.Options;
 
-namespace ipkpd;
+namespace ipkcpd;
 
 internal class Program
 {
