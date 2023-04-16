@@ -5,13 +5,14 @@ namespace ipkcpd;
 
 public interface IProtocolInterface
 {
-    public async void Listen(string address, int port){}
+    public void Listen(string address, int port){}
+    public void Stop(){}
     private enum ClientStates{
         Connected,
         Greeted,
         Disconnecting
     }
-    private async void AcceptClient(Socket client){}
+    private void AcceptClient(Socket client){}
 
     private bool OnDataRead(ArraySegment<byte> arraySegment, NetworkStream ns, ref ClientStates clientState)
     {

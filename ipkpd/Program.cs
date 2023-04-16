@@ -7,7 +7,10 @@ internal class Program
 {
     private static string? _mode;
     private static NetworkHandler? _handler;
+    private static bool _verbosity;
     public static readonly EventWaitHandle WaitHandle = new AutoResetEvent(false);
+
+
     public static void Main(string[] args)
     {
         Console.CancelKeyPress += CancelKeyPressHandler;
@@ -16,6 +19,7 @@ internal class Program
         var showHelp = false;
         var host = "";
         _mode = "";
+        _verbosity = false;
         var port = -1;
 
         var p = new OptionSet
@@ -33,6 +37,10 @@ internal class Program
                 v => _mode = v
             },
             {
+                "v=|verbose=", "connection mode.",
+                v => _verbosity = Convert.ToBoolean(v)
+            },
+            {
                 "i|help", "show this message and exit",
                 v => showHelp = v != null
             }
@@ -44,9 +52,9 @@ internal class Program
         }
         catch (OptionException e)
         {
-            Console.Error.Write("ipkcpc: ");
+            Console.Error.Write("ipkcpd: ");
             Console.Error.WriteLine(e.Message);
-            Console.Error.WriteLine("Try `ipkcpc --help' for more information.");
+            Console.Error.WriteLine("Try `ipkcpd --help' for more information.");
             return;
         }
 
@@ -76,7 +84,7 @@ internal class Program
 
         if (incompleteArguments)
         {
-            Console.Error.WriteLine("Try `ipkcpc --help' for more information.");
+            Console.Error.WriteLine("Try `ipkcpd --help' for more information.");
             Environment.Exit(1);
         }
 
@@ -88,26 +96,33 @@ internal class Program
             var input =  Console.ReadLine();
             if (input != null) _handler.SendMessage(input);
         }*/
-        Console.ReadKey();
+        while (true)
+        {
+            
+        }
     }
+
 
     protected static void CancelKeyPressHandler(object? sender, ConsoleCancelEventArgs args)
     {
-        if (_mode is "tcp") _handler?.SendMessage("BYE");
-        else
+        if (_mode is "tcp")
         {
-            Environment.Exit(0);
+            Console.WriteLine("Handling ctrl+c");
+            _handler?.Stop();
+            WaitHandle.WaitOne();
+            WaitHandle.Reset();
         }
-        WaitHandle.WaitOne();
-        WaitHandle.Reset();
+
+        Environment.Exit(0);
+
     }
 
 
     private static void ShowHelp(OptionSet p)
     {
-        Console.WriteLine("Usage: ipkcpc [OPTIONS]");
+        Console.WriteLine("Usage: ipkcpd [OPTIONS]");
         Console.WriteLine(
-            "Ipkcp is a client facilitating connection to a host conforming to the IPK Calculator Protocol.");
+            "Ipkcpd is a server conforming to the IPK Calculator Protocol.");
         Console.WriteLine();
         Console.WriteLine("Options:");
         p.WriteOptionDescriptions(Console.Out);
