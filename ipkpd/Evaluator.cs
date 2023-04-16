@@ -9,12 +9,12 @@ internal class Evaluator
     public BigInteger? Evaluate(string input)
     {
 
-        var prefix = AbfnFormToPrefix(input);
+        var prefix = AbnfToNormalPolishNotation(input);
         Console.WriteLine(prefix);
         return PrefixCalculator(prefix);
     }
     
-    private static string? AbfnFormToPrefix(string input)
+    private static string? AbnfToNormalPolishNotation(string input)
     {
         while (FindIndexes(input).Item1 != -1)
         {
@@ -127,7 +127,7 @@ internal class Evaluator
         {
             var item = list.Last();
             list = list.SkipLast(1).ToArray();
-            PrintStack(parserStack);
+            //PrintStack(parserStack);
             if (Regex.IsMatch(item.ToString(), @"^\d+$"))
             {
                 parserStack.Push(BigInteger.Parse(item));
@@ -162,9 +162,7 @@ internal class Evaluator
                         break;
                 }
             }
-            
         }
-
 
         var result = parserStack.Peek();
         Console.WriteLine("");

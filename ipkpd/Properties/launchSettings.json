@@ -6,11 +6,11 @@
     },
     "localh UDP": {
       "commandName": "Project",
-      "commandLineArgs": "-h 127.0.0.1 -p 47470 -m udp"
+      "commandLineArgs": "-h 127.0.0.1 -p 47471 -m udp"
     },
     "local TCP": {
       "commandName": "Project",
-      "commandLineArgs": "-h 127.0.0.1 -p 47470 -m tcp"
+      "commandLineArgs": "-h 127.0.0.1 -p 47471 -m tcp"
     }
   }
 }
