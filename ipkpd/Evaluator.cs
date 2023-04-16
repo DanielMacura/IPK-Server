@@ -8,10 +8,17 @@ internal class Evaluator
 {
     public BigInteger? Evaluate(string input)
     {
-
-        var prefix = AbnfToNormalPolishNotation(input);
-        Console.WriteLine(prefix);
-        return PrefixCalculator(prefix);
+        try
+        {
+            var prefix = AbnfToNormalPolishNotation(input);
+            Console.WriteLine(prefix);
+            return PrefixCalculator(prefix);
+        }
+        catch
+        {
+            return null;
+        }
+        
     }
     
     private static string? AbnfToNormalPolishNotation(string input)
