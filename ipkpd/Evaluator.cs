@@ -11,7 +11,7 @@ internal class Evaluator
         try
         {
             var prefix = AbnfToNormalPolishNotation(input);
-            Console.WriteLine(prefix);
+            //Console.WriteLine(prefix);
             return PrefixCalculator(prefix);
         }
         catch
@@ -31,13 +31,13 @@ internal class Evaluator
             var indexes = FindIndexes(input);
 
 
-            Console.WriteLine(indexes.ToString(), input);
-            Console.WriteLine("1: {0}  2:{1}   {2}  {3}", indexes.Item1, indexes.Item2, input[indexes.Item1], input[indexes.Item2]);
+            //Console.WriteLine(indexes.ToString(), input);
+            //Console.WriteLine("1: {0}  2:{1}   {2}  {3}", indexes.Item1, indexes.Item2, input[indexes.Item1], input[indexes.Item2]);
             input = input.Substring(indexes.Item1+1, (indexes.Item2 - indexes.Item1)-1).Trim();
             var opcode = input[0];
             input = input.Substring(1, input.Length-1).Trim();
 
-            Console.WriteLine(input);
+            //Console.WriteLine(input);
 
             var bracketCount = 0;
             var operatorCount = 0;
@@ -64,15 +64,15 @@ internal class Evaluator
 
             var end = original.Substring(indexes.Item2 + 1, original.Length - indexes.Item2-1);
 
-            Console.WriteLine("Start:{0}\nMid:{1}\nEnd:{2}", start, mid, end);
+            //Console.WriteLine("Start:{0}\nMid:{1}\nEnd:{2}", start, mid, end);
             input = start + mid + end;
 
 
-            Console.WriteLine(input);
-            Console.WriteLine("--------------------------------------------------------");
+            //Console.WriteLine(input);
+            //.WriteLine("--------------------------------------------------------");
         }
 
-        Console.WriteLine(input);
+        //Console.WriteLine(input);
         return input;
     }
 
@@ -116,7 +116,7 @@ internal class Evaluator
         var x = s.Peek();
         s.Pop();
         PrintStack(s);
-        Console.Write(x + " ");
+        //Console.Write(x + " ");
         s.Push(x);
     }
 
@@ -148,7 +148,7 @@ internal class Evaluator
                 var int1 = parserStack.Pop();
                 var int2 = parserStack.Pop();
 
-                Console.WriteLine(int1 + " "+ item + " " + int2);
+                //Console.WriteLine(int1 + " "+ item + " " + int2);
 
                 switch (item)
                 {
@@ -172,9 +172,9 @@ internal class Evaluator
         }
 
         var result = parserStack.Peek();
-        Console.WriteLine("");
+        //Console.WriteLine("");
         PrintStack(parserStack);
-        Console.WriteLine("Result: {0}", result);
+        //Console.WriteLine("Result: {0}", result);
         return result;
     }
 }

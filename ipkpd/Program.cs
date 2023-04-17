@@ -25,11 +25,11 @@ internal class Program
         var p = new OptionSet
         {
             {
-                "h=|host=", "IP address of AaaS provider.",
+                "h=|host=", "IP address of server.",
                 v => host = v
             },
             {
-                "p=|port=", "port of connection",
+                "p=|port=", "connection port",
                 (int v) => port = v
             },
             {
@@ -37,7 +37,7 @@ internal class Program
                 v => _mode = v
             },
             {
-                "v=|verbose=", "connection mode.",
+                "v=|verbose=", "verbosity of the server.",
                 v => _verbosity = Convert.ToBoolean(v)
             },
             {

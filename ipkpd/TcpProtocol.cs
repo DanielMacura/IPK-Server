@@ -44,7 +44,7 @@ public class TcpProtocol : IProtocolInterface
         _listening = false;
         foreach (var client in _clientList.Where(client => client != null))
         {
-            if (!client.Connected) continue;
+            if (!client!.Connected) continue;
             Console.WriteLine("Client connected");
             var bytes = Encoding.ASCII.GetBytes("BYE" + Lf);
             client.Send(bytes);
@@ -78,6 +78,7 @@ public class TcpProtocol : IProtocolInterface
                     {
                         // Client disconnected normally.
                         Console.WriteLine("Client left");
+                        break;
                     }
                     else
                     {
@@ -104,7 +105,6 @@ public class TcpProtocol : IProtocolInterface
     {
         var bytes = arraySegment.ToArray();
         var text = Encoding.ASCII.GetString(bytes, 0, bytes.Length);
-        Console.WriteLine(text+"LF");
         var result = "Incorrect solve";
 
         if (!text.EndsWith(Lf))
@@ -143,9 +143,17 @@ public class TcpProtocol : IProtocolInterface
                 var problem = text[5..text.Trim().Length];
 
                 result = eval.Evaluate(problem).ToString();
-                SendReply(ns, "RESULT "+ result.Trim() + Lf);
                 Console.WriteLine(result);
-                return false;   //no error
+                if (result != null)
+                {
+                    SendReply(ns, "RESULT "+ result.Trim() + Lf);
+                    return false;   //no error
+                }
+                else
+                {
+                    SendReply(ns, "BYE" + Lf);
+                    return true;   //error
+                }
             }
             else
             {
@@ -173,8 +181,8 @@ public class TcpProtocol : IProtocolInterface
 
     private static void SendReply(Stream ns, string message)
     {
-        var retBytes = Encoding.ASCII.GetBytes(message);
-        ns.Write(retBytes);
+        var responseBytes = Encoding.ASCII.GetBytes(message);
+        ns.Write(responseBytes);
         ns.Flush();
     }
 }
