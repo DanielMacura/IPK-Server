@@ -12,6 +12,8 @@
 
   User Datagram Protocol is a connectionless and unreliable protocol that provides a simple and efficient way to send and receive datagrams over an IP network. UDP does not guarantee delivery, order, or integrity of the data, but it minimizes the overhead and latency involved in transmitting data when compared to TCP. UDP is suitable for applications that require speed, simplicity, or real-time communication, such as streaming media, online gaming, voice over IP, or DNS queries.
 
+***
+
 ## Implementation
 
 This program is written using [clean code](https://gist.github.com/wojteklu/73c6914cc446146b8b533c0988cf8d29) conventions. The core of the communication is abstracted away and wrapped in multiple classes and may be simply extended for other protocols by implementing the protocol interface.
@@ -155,16 +157,20 @@ The class implements methods from IProtocolInterface. Many of the methods are si
 
 - `SendReply(EndPoint clientEndPoint, string? message, bool errorCode, Socket socket)`: This private method first checks wether the message length is below 255 bytes. Following that, the ASCII message is converted into a byte array which is shifted 3 bytes to the right and the header bytes are set according to IPKCP. The resulting array is sent using the socket's `SendTo()` method, to which the array and `clientEndPoint` is passed.
 
-## Tests
+***
+
+## **Tests**
 
 ### TCP Tests
 
-Input marked in code tags. Server response in plain text.
+Client messages to the server are marked with a preceding `Client` tag. Server responses are properly sent to the appropriate client and are denoted with a preceding `Server` tag.
+
+#### **Single client** tests
 
 - Simple handshake
   <pre>
-  <font style="background-color:hsl(30,80%,90%); color:black">Client:   HELLO</font>
-  <font style="background-color:hsl(220, 80%, 90%); color:black">Server:   HELLO</font>
+  Client:   HELLO
+  Server:   HELLO
   </pre>
 
 - Incorrect handshake - case sensitive
@@ -184,49 +190,109 @@ Input marked in code tags. Server response in plain text.
   </pre>
 
 - Multiple exchanges
-
-  1. `HELLO`
-  2. HELLO
-  3. `SOLVE (+ 1 2)`
-  4. 3
-  5. `SOLVE (* 1 2 3 4 5)`
-  6. 120
-  7. `SOLVE (- 2 2)`
-  8. 0
-  9. `BYE`
-  10. BYE
+  <pre>
+  Client:   HELLO
+  Server:   HELLO
+  Client:   SOLVE (+ 1 2)
+  Server:   3
+  Client:   SOLVE (* 1 2 3 4 5)
+  Server:   120
+  Client:   SOLVE (- 2 2)
+  Server:   0
+  Client:   BYE
+  Server:   BYE
+  </pre>
 
 - Incorrect exchange - 1
-
-  1. `HELLO`
-  1. HELLO
-  2. `SOLVE (1 2)`
-  3. BYE
+  <pre>
+  Client:   HELLO
+  Server:   HELLO
+  Client:   SOLVE (1 2)
+  Server:   BYE
+  </pre>
 
 - Incorrect exchange - 2
-
-  1. `HELLO`
-  1. HELLO
-  2. `SOLVE (+)`
-  3. BYE
+  <pre>
+  Client:   HELLO
+  Server:   HELLO
+  Client:   SOLVE (+)
+  Server:   BYE
+  </pre>
 
 - SIGN INT
+  <pre>
+  Client:   HELLO
+  Server:   HELLO
+  Client:   SOLVE (+ 1 2)
+  Server:   Ctrl + C      (sends BYE)
+  Client:   BYE
+  </pre>
 
-  1. `HELLO`
-  2. HELLO
-  3. `SOLVE (+ 1 2)`
-  4. 3
-  5. `Ctrl + C`
-  6. BYE
+#### **Multiple client** tests
+
+- Simple handshake
+  <pre>
+  Client 1: HELLO
+  Server:   HELLO
+  Client 2: HELLO
+  Server:   HELLO
+  </pre>
+
+- Incorrect handshake - case sensitive
+  <pre>
+  Client 1: ello
+  Server:   BYE
+  Client 2: HELLO
+  Server:   HELLO
+  </pre>
+
+- Simple exchange
+  <pre>
+  Client 1: HELLO
+  Server:   HELLO
+  Client 1: SOLVE (+ 1 2)
+  Client 2: HELLO
+  Server:   3
+  Server:   HELLO
+  Client 1: BYE
+  Client 2: SOLVE (+ 4 4)
+  Server:   BYE
+  Server:   8
+  </pre>
+
+- Incorrect exchange
+  <pre>
+  Client 1: HELLO
+  Server:   HELLO
+  Client 1: SOLVE (1 2)
+  Client 2: HELLO
+  Server:   BYE
+  Server:   HELLO
+  Client 1: SOLVE (+2 2)
+  Server:   4
+  </pre>
+
+- SIGN INT
+  <pre>
+  Client 1:   HELLO
+  Client 2:   HELLO
+  Server:   HELLO
+  Server:   HELLO
+  Client 1:   SOLVE (+ 1 2)
+  Server:   Ctrl + C      (sends BYE to all clients)
+  Client 1:   BYE
+  Client 2:   BYE
+  </pre>
 
 ### UDP Tests
 
-Input marked in code tags. Server response in plain text.
+Client messages to the server are marked with a preceding `Client` tag. Server responses are properly sent to the appropriate client and are denoted with a preceding `Server` tag and are formated as a byte array.
 
 - Simple exchange
-
-  1. `(+ 1 1 1 1)`
-  2. OK:4
+  <pre>
+  Client: (+ 1 1 1 1)
+  Server: 4
+  </pre>
 
 - Multiple exchanges
 
