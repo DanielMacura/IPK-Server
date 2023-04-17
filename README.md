@@ -389,7 +389,7 @@ Client messages to the server are marked with a preceding `Client` tag. Server r
 
 [4]: Microsoft, 2023, *TcpClient Class*, accessed 21 March 2023, <https://learn.microsoft.com/en-us/dotnet/api/system.net.sockets.tcpclient?view=net-7.0>
 
-[5]: Jonathan C Dickson, 2015, *.Net Sockets and You*, accessed 16 April 2023, <https://web.archive.org/web/20160728022524/http://blog.dickinsons.co.za/tips/2015/06/01/Net-Sockets-and-You/>
+[5]: Jonathan C Dickinson, 2015, *.Net Sockets and You*, accessed 16 April 2023, <https://web.archive.org/web/20160728022524/http://blog.dickinsons.co.za/tips/2015/06/01/Net-Sockets-and-You/>
 
 [6]: Microsoft, 2023, Asynchronous Programming Model (APM), accessed 17 April 2023, <https://learn.microsoft.com/en-us/dotnet/standard/asynchronous-programming-patterns/asynchronous-programming-model-apm>
 
