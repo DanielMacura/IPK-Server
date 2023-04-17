@@ -175,6 +175,10 @@ internal class Evaluator
         //Console.WriteLine("");
         PrintStack(parserStack);
         //Console.WriteLine("Result: {0}", result);
+        if (result < 0)
+        {
+            return null;
+        }
         return result;
     }
 }

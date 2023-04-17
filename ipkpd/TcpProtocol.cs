@@ -144,7 +144,7 @@ public class TcpProtocol : IProtocolInterface
 
                 result = eval.Evaluate(problem).ToString();
                 Console.WriteLine(result);
-                if (result != null)
+                if (result != "")
                 {
                     SendReply(ns, "RESULT "+ result.Trim() + Lf);
                     return false;   //no error
