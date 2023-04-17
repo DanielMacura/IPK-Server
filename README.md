@@ -64,7 +64,7 @@ _handler.Start(host, port);
 
 ### Network Handler Class
 
-The class acts as a wrapper for the underlaying [Tcp](#tcp-class) and [Udp](#udp-class) Protocols and helps abstract away more of the connection details. The bellow provided snippet showcases its two classes.
+The class acts as a wrapper for the underlying [Tcp](#tcp-class) and [Udp](#udp-class) Protocols and helps abstract away more of the connection details. The bellow provided snippet showcases its two classes.
 
 ``` c#
 private readonly string _mode;
@@ -193,9 +193,7 @@ It is now trivial to compute the provided prefix form with the use of a single s
 
 ***
 
-
 ## Tests
-
 
 ### TCP Tests
 
@@ -376,7 +374,7 @@ Client messages to the server are marked with a preceding `Client` tag. Server r
 ## Extra features
 </center>
 
-- The software has been updated with a new command line flag, `--help`, which can be used to display the help information. This flag can be invoked by executing the command `./ipkcpc --help` or `./ipkcpc -i`.
+- The software has been updated with a new command line flag, `--help`, which can be used to display the help information. This flag can be invoked by executing the command `./ipkcpd --help` or `./ipkcpd -i`.
   
     ```
     Usage: ipkcpd [OPTIONS]
@@ -387,10 +385,10 @@ Client messages to the server are marked with a preceding `Client` tag. Server r
         -p, --port=VALUE           connection port
         -m, --mode=VALUE           connection mode.
         -v, --verbose=VALUE        verbosity of the server.
-        -i, --help                 show this message and exit
+        -i, --help                 show this message and exit.
     ```
 
-- Additionally, the command line argument order is arbitrary. Users can now pass the flags in any order they prefer when executing the software. For instance, the command `./ipkcpc -m UDP -p 2023 -H localhost` is a valid input and will be processed correctly by the software.
+- Additionally, the command line argument order is arbitrary. Users can now pass the flags in any order they prefer when executing the software. For instance, the command `./ipkcpd -m UDP -p 2023 -H 127.0.0.1` is a valid input and will be processed correctly by the software.
 - The server may internally execute calculations with arbitrarily large numbers thanks to `BitInteger`.
 - The user may change the server verbosity level.
 
