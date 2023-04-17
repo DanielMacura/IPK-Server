@@ -361,13 +361,13 @@ Client messages to the server are marked with a preceding `Client` tag. Server r
 - Received message too long
   <pre>
   Client:   (+ 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1)
-  Server: Received message over 255 bytes.  [1, 1, 32, ...]
+  Server:   Received message over 255 bytes.  [1, 1, 32, ...]
   </pre>
 
 - Sent message too long
   <pre>
   Client:   (* 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9 9)
-  Server: Received message over 255 bytes.  [1, 1, 32, ...]
+  Server:   Received message over 255 bytes.  [1, 1, 32, ...]
   </pre>
 
 ***
