@@ -2,6 +2,24 @@
 
   A simple server for the IPK Calculator Protocol written in C#.
 
+**Table of contents:**
+
+- [IPK - second project - IOTA](#ipk---second-project---iota)
+  - [Executive summary of used protocols](#executive-summary-of-used-protocols)
+  - [Implementation](#implementation)
+    - [Network Handler Class](#network-handler-class)
+    - [TCP communication](#tcp-communication)
+      - [TcpProtocol Class](#tcpprotocol-class)
+      - [UdpProtocol Class](#udpprotocol-class)
+    - [Evaluator](#evaluator)
+  - [Tests](#tests)
+    - [TCP Tests](#tcp-tests)
+      - [Single client tests](#single-client-tests)
+      - [Multiple client tests](#multiple-client-tests)
+    - [UDP Tests](#udp-tests)
+  - [Extra features](#extra-features)
+  - [References](#references)
+
 ## Executive summary of used protocols
 
 - ### TCP
@@ -175,16 +193,15 @@ It is now trivial to compute the provided prefix form with the use of a single s
 
 ***
 
-<center>
 
-## **Tests**
-</center>
+## Tests
+
 
 ### TCP Tests
 
 Client messages to the server are marked with a preceding `Client` tag. Server responses are properly sent to the appropriate client and are denoted with a preceding `Server` tag.
 
-#### **Single client** tests
+#### Single client tests
 
 - Simple handshake
   <pre>
@@ -247,7 +264,7 @@ Client messages to the server are marked with a preceding `Client` tag. Server r
   Client:   BYE
   </pre>
 
-#### **Multiple client** tests
+#### Multiple client tests
 
 - Simple handshake
   <pre>
