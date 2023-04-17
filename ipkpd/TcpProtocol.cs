@@ -27,7 +27,6 @@ public class TcpProtocol : IProtocolInterface
                 Console.WriteLine("Connecting");
 
                 var client = await Task.Factory.FromAsync<Socket>(_socket.BeginAccept, _socket.EndAccept, null);
-                Console.WriteLine("Connecting");
                 _clientList.Add(client);
 
                 AcceptClient(client);

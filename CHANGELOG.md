@@ -17,5 +17,6 @@ The program will terminate with a status code of either 0 (SUCCESS) or 1 (ERROR)
 - [ ] Verbosity flag not fully implemented.
 - [ ] Checking for EOF to exit program flow.
 - [ ] The evaluator also accepts more loosely defined grammar in terms of whitespace.
+- [ ] Add separate evaluation of tcp queries to support negative results. 
 - [ ] Write documentation for more tests.
 - [ ] On Nix, when parsing a non numerical address, an exception is thrown.
